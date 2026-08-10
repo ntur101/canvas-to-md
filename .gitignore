@@ -1,0 +1,8 @@
+node_modules/
+browser-data/
+Output/
+temp/
+logs/
+state/
+settings.json
+*.log

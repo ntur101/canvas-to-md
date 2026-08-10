@@ -1,0 +1,38 @@
+{
+  "name": "canvas-to-md",
+  "version": "0.1.0",
+  "description": "Scrapes UoA Canvas module content and converts it to Markdown verbatim — no summarising, all the info preserved",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "setup": "playwright install msedge",
+    "typecheck": "tsc --noEmit",
+    "setup-auth": "tsx scripts/setup-auth.ts",
+    "setup-auth-sharepoint": "tsx scripts/setup-auth-sharepoint.ts",
+    "probe": "tsx scripts/probe.ts",
+    "courses": "tsx scripts/list-courses.ts",
+    "survey": "tsx scripts/survey.ts",
+    "dev": "tsx scripts/scrape.ts",
+    "dev:force": "tsx scripts/scrape.ts --force",
+    "dev:no-prune": "tsx scripts/scrape.ts --no-prune"
+  },
+  "dependencies": {
+    "adm-zip": "^0.6.0",
+    "pdf-parse": "^1.1.1",
+    "playwright": "^1.50.0",
+    "turndown": "^7.2.0",
+    "turndown-plugin-gfm": "^1.0.2",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "@types/adm-zip": "^0.5.8",
+    "@types/node": "^22.10.0",
+    "@types/turndown": "^5.0.5",
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0"
+  }
+}
