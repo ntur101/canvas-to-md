@@ -104,6 +104,12 @@ export const DEFAULTS = {
      * doesn't follow that rule.
      */
     courseFolders: {} as Record<string, string>,
+    /**
+     * Canvas course ids to scrape even though they fall outside the default set
+     * (student + current term) — e.g. a full-year paper Canvas files under
+     * Semester One. `npm run courses` prints each course's id.
+     */
+    extraCourseIds: [] as number[],
     /** Keep the original PDF alongside its extracted-text .md (your choice). */
     keepOriginalPdf: true,
     /**

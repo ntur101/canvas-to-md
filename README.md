@@ -45,7 +45,7 @@ warning. Read `## Orphan cleanup` before turning pruning on — it deletes files
 | --- | --- |
 | `npm run setup-auth` | Headed Microsoft SSO login for Canvas; saves the session. |
 | `npm run probe` | Confirms session-based API access works; lists all active courses. |
-| `npm run courses` | Lists courses with your role + term, flags the scrape set (student + current term). |
+| `npm run courses` | Lists courses with your role + term, flags the scrape set (student + current term, plus `scrape.extraCourseIds`). |
 | `npm run survey` | Read-only inventory of every module item across the scrape set, by type/extension/host. |
 | `npm run setup-auth-sharepoint` | Headed SSO login for `uoa-my.sharepoint.com`; needed to download SharePoint files. |
 | `npm run dev` | The main run: walk modules, fetch every item, convert to Markdown, write to `paths.output`. Incremental by default — see below. |
@@ -280,6 +280,7 @@ warns and falls back rather than failing mid-run.
 | `extras.syllabus` / `.announcements` / `.unfiledPages` / `.unfiledFiles` | Which outside-the-modules sections to scrape. Files default to off. |
 | `retry.*` | Attempts and backoff for transient failures (rate limits, 5xx, dropped sockets). |
 | `scrape.courseFolders` | Maps Canvas course code (`COMPSYS 726`) → vault folder (`COMPSYS-726`). |
+| `scrape.extraCourseIds` | Canvas course ids to scrape outside the default set, e.g. `[143801]` for a full-year paper filed under a past term. Ids come from `npm run courses`. |
 | `scrape.keepOriginalPdf` | Keep the original PDF beside its extracted `.md`. |
 
 ## Limitations / notes

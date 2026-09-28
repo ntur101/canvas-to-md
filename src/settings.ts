@@ -27,7 +27,7 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
 export const SETTINGS_PATH = path.join(ROOT, "settings.json");
 
-type Kind = "string" | "bool" | "stringMap";
+type Kind = "string" | "bool" | "stringMap" | "numberList";
 
 /**
  * The whitelist of overridable settings. Deliberately not everything in
@@ -44,6 +44,7 @@ const OVERRIDABLE: Record<string, Kind> = {
   "scrape.includeRubrics": "bool",
   "scrape.includeQuizQuestions": "bool",
   "scrape.courseFolders": "stringMap",
+  "scrape.extraCourseIds": "numberList",
   "extras.folder": "string",
   "extras.syllabus": "bool",
   "extras.announcements": "bool",
@@ -77,6 +78,11 @@ function validate(dotted: string, kind: Kind, raw: unknown): unknown | undefined
   if (kind === "string") {
     if (typeof raw === "string" && raw.trim().length > 0) return raw.trim();
     console.warn(`[settings] ${dotted}: expected a non-empty string — using default`);
+    return undefined;
+  }
+  if (kind === "numberList") {
+    if (Array.isArray(raw) && raw.every((v) => Number.isInteger(v))) return raw;
+    console.warn(`[settings] ${dotted}: expected an array of integers — using default`);
     return undefined;
   }
   // stringMap
