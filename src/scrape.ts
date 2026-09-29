@@ -39,6 +39,7 @@ import {
   type CanvasFile,
 } from "./canvasApi.js";
 import { getScrapeCourses } from "./courses.js";
+import { ensureCanvasSession } from "./auth.js";
 import { htmlToMarkdown } from "./convert/html.js";
 import { localiseCanvasAssets } from "./assets.js";
 import { extractFileMarkdown } from "./extract.js";
@@ -1117,6 +1118,8 @@ export function printTally(
 export async function scrapeAll(
   opts: { force?: boolean; prune?: boolean; noPrune?: boolean } = {},
 ): Promise<void> {
+  // Opens the login window first if the saved session has lapsed.
+  await ensureCanvasSession();
   const api = await makeCanvasContext();
   const manifest = loadManifest();
   const incremental = CONFIG.scrape.incremental && !opts.force;

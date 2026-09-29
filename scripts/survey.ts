@@ -14,6 +14,7 @@ import {
   type CanvasModuleItem,
 } from "../src/canvasApi.js";
 import { getScrapeCourses } from "../src/courses.js";
+import { ensureCanvasSession } from "../src/auth.js";
 import { log } from "../src/logger.js";
 
 function tally(map: Map<string, number>, key: string): void {
@@ -46,6 +47,7 @@ function hostOf(url: string | undefined): string {
 }
 
 async function main(): Promise<void> {
+  await ensureCanvasSession();
   const ctx = await makeCanvasContext();
   try {
     const courses = await getScrapeCourses(ctx);

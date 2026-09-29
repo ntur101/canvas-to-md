@@ -7,15 +7,3 @@ declare module "turndown-plugin-gfm" {
   export const strikethrough: TurndownService.Plugin;
   export const taskListItems: TurndownService.Plugin;
 }
-
-declare module "pdf-parse" {
-  interface PdfParseResult {
-    text: string;
-    numpages: number;
-    info?: unknown;
-    metadata?: unknown;
-    version?: string;
-  }
-  function pdfParse(data: Buffer | Uint8Array): Promise<PdfParseResult>;
-  export = pdfParse;
-}

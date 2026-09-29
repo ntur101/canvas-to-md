@@ -173,7 +173,7 @@ export function rewriteInternalLinks(
   const unresolvedPages: PageRef[] = [];
   const unresolvedFiles: FileRef[] = [];
 
-  const out = markdown.replace(MD_LINK, (whole, text: string, url: string, title: string | undefined) => {
+  const out = markdown.replace(MD_LINK, (whole, text: string, url: string, title: string | undefined, offset: number) => {
     const key = keyForUrl(url);
     if (!key) return whole;
     const target = index.get(key);
@@ -198,7 +198,11 @@ export function rewriteInternalLinks(
     if (label === "" || label === target.basename) {
       return `[[${target.basename}]]`;
     }
-    return `[[${target.basename}|${label}]]`;
+    // Inside a Markdown table row a bare "|" would end the cell; Obsidian reads
+    // "\|" as the alias separator there instead.
+    const rowStart = markdown.lastIndexOf("\n", offset) + 1;
+    const separator = markdown.startsWith("|", rowStart) ? "\\|" : "|";
+    return `[[${target.basename}${separator}${label}]]`;
   });
 
   return { markdown: out, rewritten, unresolvedPages, unresolvedFiles };

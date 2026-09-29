@@ -43,7 +43,7 @@ warning. Read `## Orphan cleanup` before turning pruning on — it deletes files
 
 | Command | What it does |
 | --- | --- |
-| `npm run setup-auth` | Headed Microsoft SSO login for Canvas; saves the session. |
+| `npm run setup-auth` | Headed SSO login for Canvas; saves the session. Runs automatically when `dev` finds the session expired. |
 | `npm run probe` | Confirms session-based API access works; lists all active courses. |
 | `npm run courses` | Lists courses with your role + term, flags the scrape set (student + current term, plus `scrape.extraCourseIds`). |
 | `npm run survey` | Read-only inventory of every module item across the scrape set, by type/extension/host. |
@@ -51,6 +51,7 @@ warning. Read `## Orphan cleanup` before turning pruning on — it deletes files
 | `npm run dev` | The main run: walk modules, fetch every item, convert to Markdown, write to `paths.output`. Incremental by default — see below. |
 | `npm run dev:force` | Same, but ignores the incremental cache and re-fetches/re-converts everything. |
 | `npm run dev:no-prune` | Same, but only lists orphaned files instead of deleting them. |
+| `npm run reconvert` | Offline: re-run the converters over every original already on disk and refresh its `.md`. Use after a converter changes. `-- --dry-run` lists what would change. |
 | `npm run typecheck` | `tsc --noEmit`. |
 
 ## How auth works
@@ -63,6 +64,16 @@ session cookie, and so do we (read-only, so no CSRF header is ever needed).
 resulting `canvas.auckland.ac.nz` session is saved to
 `browser-data/storage-state.json` (gitignored). Everything after that is plain
 HTTP against the saved session — no browser window.
+
+The session can't be made to last longer: Canvas's cookie has no expiry of its
+own, and UoA ends it (and its sign-in page's session) server-side within about
+a day. So `dev`, `courses` and `survey` check it first, and when it has lapsed
+they **open the login window themselves** and carry on once you're signed in,
+instead of failing. The window runs in a persistent Edge profile
+(`browser-data/canvas-profile/`), so the sign-in page's remembered-device cookie
+(a year long) carries over and a re-login is usually just username and password.
+Set `"browser.autoLogin": false` in `settings.json` for unattended runs, where
+nobody is there to sign in; they then fail with the command to run.
 
 **SharePoint** (`uoa-my.sharepoint.com`) is a different domain with its own
 cookies, so it needs its own login: `setup-auth-sharepoint` (seeded from the
@@ -211,7 +222,7 @@ never be mistaken for a stale note and deleted.
 ### Extracted-text cleanup
 
 Every converter's output passes through a shared cleaner. Some PDFs — Powerpoint
-exports especially — come back from `pdf-parse` with NUL bytes woven through the
+exports especially — come back from the text extractor with NUL bytes woven through the
 text (one deck was 77% NUL bytes), which makes the note unsearchable and flags it
 as binary to tooling. The readable text underneath is intact, so the control
 characters are stripped and nothing legible is lost.
@@ -220,11 +231,33 @@ Canvas's newer "Design Block" pages hide config as JSON in
 `<span class="cdbData" style="display:none">`; the HTML converter strips those
 so only real content survives.
 
-**Converters** (`src/convert/`): `html` (Turndown), `pdf` (pdf-parse), `pptx`
-(unzip → `<a:t>` slide text + speaker notes), `xlsx` (SheetJS → Markdown
-tables), `docx` (unzip → `<w:t>` runs, with Word heading styles preserved), and
-`text` (the shared cleanup below). All deterministic — nothing is ever
-summarised or reworded.
+### Tables and ligatures
+
+Tables come through as Markdown tables from every source, not as a stack of
+loose cells:
+
+- **HTML**: every table is converted, including ones without a header row
+  (turndown-plugin-gfm left those as raw HTML). Lists, paragraphs and `<br>`
+  inside a cell stay on the cell's row as `<br>`, and colspans are padded.
+- **PDF**: bordered tables are rebuilt from the cell borders drawn on the page
+  (`src/convert/pdfLayout.ts`), including tables that run over a page break,
+  with Word's repeated header row shown once. Borderless tables stay as lines of
+  text. A single framed box is kept as text, not a one-cell table.
+- **docx / pptx**: `<w:tbl>` and `<a:tbl>` become tables, with merged cells
+  handled.
+
+Word documents exported with "Acrobat PDFMaker" map the ti/tti/ft ligatures to
+`�` and the tt ligature to a single `t` in the PDF itself, so every extractor
+reads "sec�on" and "writen". `src/convert/ligatures.ts` repairs those against a
+word list ranked by frequency; anything it can't place confidently stays marked
+with `�` rather than being guessed.
+
+**Converters** (`src/convert/`): `html` (Turndown), `pdf` (pdf.js via
+`pdfjs-dist`, plus `pdfLayout` and `ligatures`), `pptx` (unzip → `<a:t>` slide
+text + speaker notes + tables), `xlsx` (SheetJS → Markdown tables), `docx`
+(unzip → `<w:t>` runs and `<w:tbl>` tables, with Word heading styles
+preserved), and `text` (the shared cleanup below). All deterministic — nothing
+is ever summarised or reworded.
 
 ## Output layout
 
@@ -298,7 +331,11 @@ warns and falls back rather than failing mid-run.
   (e.g. `‚Äô` for `'`) — cosmetic; the text is otherwise verbatim.
 - **SharePoint incremental check is existence-only** (no `updated_at` from
   Canvas for external links) — if a deck changes upstream at the same
-  sharing link, delete the local copy to pick up the new version.
+  sharing link, delete the local copy to pick up the new version. The same is
+  true of linked and unfiled files, even under `dev:force`; `npm run reconvert`
+  is how their notes pick up converter changes.
+- **Overprinted PDF text** (a word drawn several times on top of itself for a
+  bold effect) comes through repeated, as it did before.
 
 ## Roadmap
 

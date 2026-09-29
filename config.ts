@@ -59,6 +59,13 @@ export const DEFAULTS = {
     navigationTimeout: 60_000,
     /** How long setup-auth waits for you to finish the SSO login, in ms. */
     authLoginTimeout: 5 * 60_000,
+    /**
+     * When a run finds the saved Canvas session expired (UoA ends it within
+     * about a day, server-side), open the login window itself and carry on once
+     * you're signed in, rather than failing with "run setup-auth". Turn off for
+     * unattended runs, where nobody is there to sign in.
+     */
+    autoLogin: true,
   },
 
   paths: {
@@ -68,6 +75,12 @@ export const DEFAULTS = {
      * canvas.auckland.ac.nz, so it needs its own login.
      */
     storageState: path.join(__dirname, "browser-data", "storage-state.json"),
+    /**
+     * The Edge profile the Canvas login window runs in. Kept between logins so
+     * the university sign-in page's remembered-device (MFA) cookie and anything
+     * Edge remembers carry over, which makes a re-login quicker than a fresh one.
+     */
+    browserProfile: path.join(__dirname, "browser-data", "canvas-profile"),
     /**
      * Separate signed-in session for SharePoint/OneDrive (uoa-my.sharepoint.com).
      * A different domain from Canvas with its own cookies, so it needs its own

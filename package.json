@@ -18,14 +18,17 @@
     "survey": "tsx scripts/survey.ts",
     "dev": "tsx scripts/scrape.ts",
     "dev:force": "tsx scripts/scrape.ts --force",
-    "dev:no-prune": "tsx scripts/scrape.ts --no-prune"
+    "dev:no-prune": "tsx scripts/scrape.ts --no-prune",
+    "reconvert": "tsx scripts/reconvert.ts"
   },
   "dependencies": {
     "adm-zip": "^0.6.0",
-    "pdf-parse": "^1.1.1",
+    "pdf-lib": "^1.17.1",
+    "pdfjs-dist": "^4.10.38",
     "playwright": "^1.50.0",
     "turndown": "^7.2.0",
     "turndown-plugin-gfm": "^1.0.2",
+    "wordlist-english": "^1.2.1",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {

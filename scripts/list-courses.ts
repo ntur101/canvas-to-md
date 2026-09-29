@@ -7,11 +7,13 @@
  * inductions and finished papers all fall away here.
  */
 
+import { ensureCanvasSession } from "../src/auth.js";
 import { makeCanvasContext, canvasGet, type CanvasCourse } from "../src/canvasApi.js";
 import { roles, isExtra, inScrapeSet } from "../src/courses.js";
 import { log } from "../src/logger.js";
 
 async function main(): Promise<void> {
+  await ensureCanvasSession();
   const ctx = await makeCanvasContext();
   try {
     const { data: courses } = await canvasGet<CanvasCourse[]>(

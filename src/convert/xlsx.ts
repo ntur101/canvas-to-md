@@ -8,6 +8,7 @@
 
 import * as XLSX from "xlsx";
 import { log } from "../logger.js";
+import { markdownTable } from "./table.js";
 
 export interface XlsxText {
   text: string;
@@ -36,29 +37,10 @@ function fixMojibake(s: string): string {
   return out;
 }
 
-function escapeCell(v: unknown): string {
-  return fixMojibake(String(v ?? "")).replace(/\r?\n/g, " ").replace(/\|/g, "\\|").trim();
-}
-
 /** A 2-D array of rows -> a GitHub Markdown table (first row as the header). */
 function rowsToTable(rows: unknown[][]): string {
-  const nonEmpty = rows.filter((r) => r.some((c) => String(c ?? "").trim() !== ""));
-  if (nonEmpty.length === 0) return "_(empty sheet)_";
-
-  const width = Math.max(...nonEmpty.map((r) => r.length));
-  const pad = (r: unknown[]): string[] => {
-    const cells = r.map(escapeCell);
-    while (cells.length < width) cells.push("");
-    return cells;
-  };
-
-  const header = pad(nonEmpty[0]);
-  const lines = [
-    `| ${header.join(" | ")} |`,
-    `| ${header.map(() => "---").join(" | ")} |`,
-    ...nonEmpty.slice(1).map((r) => `| ${pad(r).join(" | ")} |`),
-  ];
-  return lines.join("\n");
+  const table = markdownTable(rows.map((r) => r.map((c) => fixMojibake(String(c ?? "")))));
+  return table === "" ? "_(empty sheet)_" : table;
 }
 
 export function xlsxToMarkdown(buffer: Buffer, label: string): XlsxText | null {

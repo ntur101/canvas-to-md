@@ -36,6 +36,7 @@ type Kind = "string" | "bool" | "stringMap" | "numberList";
  */
 const OVERRIDABLE: Record<string, Kind> = {
   "canvas.baseUrl": "string",
+  "browser.autoLogin": "bool",
   "paths.output": "string",
   "scrape.subfolder": "string",
   "scrape.incremental": "bool",

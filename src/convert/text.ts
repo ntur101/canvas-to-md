@@ -44,6 +44,18 @@ export function cleanExtractedText(text: string): string {
   return out.replace(/\n{3,}/g, "\n\n").trim();
 }
 
+/**
+ * Just the noise removal from cleanExtractedText, with no other changes: for a
+ * fragment of text (one PDF text item) whose spacing still matters.
+ */
+export function stripNoise(text: string): string {
+  let out = "";
+  for (const ch of text) {
+    if (!isNoise(ch.codePointAt(0) ?? 0)) out += ch;
+  }
+  return out;
+}
+
 /** How many characters cleaning would strip — for logging a noisy extraction. */
 export function countNoise(text: string): number {
   let n = 0;
